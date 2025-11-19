@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberSafe 2025: Ultimate Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+     
+        :root {
+            --bg-dark: #050505;
+            --glass: rgba(20, 20, 20, 0.95);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.15);
+            --accent: #3b82f6;
+            --success: #10b981;
+            --error: #ef4444;
+            --text-main: #ffffff;
+            --text-muted: #9ca3af;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000;
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+       
+        #desktop {
+            width: 100%; height: 100%;
+            background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop') no-repeat center center/cover;
+            position: relative;
+        }
+
+        .taskbar {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            height: 70px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex; align-items: center; gap: 15px; padding: 0 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 100;
+        }
+
+        .dock-icon {
+            width: 50px; height: 50px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px;
+            background: rgba(255,255,255,0.1);
+            position: relative;
+        }
+
+        .dock-icon:hover { transform: translateY(-10px) scale(1.1); background: rgba(255,255,255,0.2); }
+        .dock-tooltip {
+            position: absolute; top: -40px; left: 50%; transform: translateX(-50%);
+            background: #222; padding: 5px 10px; border-radius: 5px; font-size: 0.8rem;
+            opacity: 0; transition: 0.2s; pointer-events: none; white-space: nowrap;
+        }
+        .dock-icon:hover .dock-tooltip { opacity: 1; top: -50px; }
+
+        .xp-widget {
+            position: absolute; top: 20px; right: 20px;
+            background: rgba(0,0,0,0.7); padding: 10px 20px;
+            border-radius: 20px; border: var(--glass-border);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: bold; color: var(--accent);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+
+      
+        .window {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            opacity: 0;
+            width: 1000px; height: 600px;
+            background: #1a1a1a;
+            border-radius: 12px;
+            border: var(--glass-border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            display: none; 
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 10;
+            animation: openWindow 0.3s forwards cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes openWindow {
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .win-header {
+            height: 44px; background: #222;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 16px; border-bottom: 1px solid #333;
+            flex-shrink: 0;
+        }
+        .win-title { font-weight: 600; font-size: 0.9rem; color: #ddd; }
+        .win-close {
+            width: 28px; height: 28px; border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: #aaa; transition: 0.2s;
+        }
+        .win-close:hover { background: var(--error); color: #fff; }
+        .win-body { flex: 1; overflow: hidden; display: flex; position: relative; }
+
+        .gmail-container { display: flex; width: 100%; height: 100%; background: #121212; }
+        .g-sidebar {
+            width: 200px; background: #1e1e1e; padding: 20px 10px;
+            border-right: 1px solid #333; display: flex; flex-direction: column; gap: 5px;
+        }
+        .g-nav-item {
+            padding: 10px 15px; border-radius: 8px; cursor: pointer; color: #ccc; font-size: 0.9rem;
+        }
+        .g-nav-item.active, .g-nav-item:hover { background: #333; color: #fff; }
+        
+        .g-list { width: 320px; background: #121212; border-right: 1px solid #333; overflow-y: auto; }
+        .g-email-item {
+            padding: 15px; border-bottom: 1px solid #2a2a2a; cursor: pointer; transition: 0.2s;
+        }
+        .g-email-item:hover { background: #1f1f1f; }
+        .g-email-item.unread { background: #1a1c20; border-left: 3px solid var(--accent); }
+        .g-sender { font-weight: 700; font-size: 0.9rem; color: #eee; margin-bottom: 4px; }
+        .g-subj { font-size: 0.85rem; color: #fff; margin-bottom: 4px; }
+        .g-prev { font-size: 0.8rem; color: #888; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        
+        .g-star-icon { float: right; font-size: 1.2rem; color: #444; transition:0.2s; }
+        .g-star-icon.active { color: gold; }
+
+        .g-content { flex: 1; padding: 30px; background: #121212; overflow-y: auto; }
+        .g-view-header { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #333; }
+        .g-avatar-circle {
+            width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(45deg, #444, #666);
+            display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 15px;
+        }
+        .g-actions { margin-top: 30px; display: flex; gap: 10px; flex-wrap: wrap; }
+
+  
+        .vk-container { display: flex; width: 100%; height: 100%; background: #19191a; }
+        .vk-list { width: 280px; border-right: 1px solid #2c2c2d; overflow-y: auto; background: #222222; }
+        .vk-chat-preview {
+            padding: 12px; display: flex; gap: 12px; cursor: pointer; border-bottom: 1px solid #2c2c2d;
+        }
+        .vk-chat-preview:hover { background: #2b2b2b; }
+        .vk-chat-preview.active { background: #333333; border-left: 3px solid var(--accent); }
+        .vk-ava { width: 48px; height: 48px; border-radius: 50%; background: #444; background-size: cover; flex-shrink: 0; }
+        .vk-info { overflow: hidden; }
+        .vk-name { font-weight: 600; font-size: 0.95rem; color: #e1e3e6; margin-bottom: 3px; }
+        .vk-last { font-size: 0.85rem; color: #828282; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .vk-dialog { flex: 1; display: flex; flex-direction: column; background: #19191a; }
+        .vk-messages-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .vk-bubble {
+            max-width: 85%; padding: 10px 16px; font-size: 0.95rem; line-height: 1.4; border-radius: 16px; position: relative;
+        }
+        .vk-in { align-self: flex-start; background: #333333; color: #fff; border-bottom-left-radius: 4px; }
+        .vk-out { align-self: flex-end; background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+        
+        .vk-input-area {
+            padding: 15px; background: #222; border-top: 1px solid #333; display: flex; gap: 10px; flex-wrap: wrap; flex-shrink: 0;
+        }
+
+        .browser-shell { display: flex; flex-direction: column; height: 100%; background: #fff; color: #000; }
+        .browser-toolbar {
+            background: #f1f3f4; padding: 8px 15px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #ddd;
+        }
+        .url-bar {
+            flex: 1; background: #fff; border: 1px solid #ccc; border-radius: 20px; padding: 6px 15px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; display: flex; align-items: center; gap: 10px;
+        }
+        .lock-icon { color: #10b981; }
+        .lock-icon.unsafe { color: #ef4444; }
+        
+        .web-viewport { flex: 1; padding: 40px; overflow-y: auto; text-align: center; background: #fff; }
+        .web-hero { max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 30px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .btn-web {
+            padding: 10px 20px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; margin: 5px;
+        }
+
+        .store-layout { background: #1c1c1e; height: 100%; overflow-y: auto; padding: 20px; }
+        .store-hero {
+            background: linear-gradient(135deg, #ff00cc, #333399);
+            padding: 30px; border-radius: 15px; margin-bottom: 25px; color: white;
+        }
+        .store-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .app-card {
+            background: #2c2c2e; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; text-align: center;
+            transition: 0.2s; border: 1px solid transparent;
+        }
+        .app-card:hover { background: #3a3a3c; transform: translateY(-5px); }
+        .app-card-icon { font-size: 3rem; margin-bottom: 10px; }
+        .app-rating { color: #ffd700; font-size: 0.8rem; margin: 5px 0; }
+        .app-perms { font-size: 0.7rem; color: #aaa; margin: 10px 0; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 4px; width: 100%; }
+
+
+        .files-layout { background: #202020; height: 100%; padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, 100px); gap: 20px; align-content: start; }
+        .file-icon {
+            display: flex; flex-direction: column; align-items: center; cursor: pointer; text-align: center;
+            padding: 10px; border-radius: 5px;
+        }
+        .file-icon:hover { background: rgba(255,255,255,0.1); }
+        .f-img { font-size: 2.5rem; margin-bottom: 5px; }
+        .f-name { font-size: 0.8rem; color: #ddd; word-break: break-all; }
+
+        .settings-layout { background: #111; height: 100%; display: flex; }
+        .set-sidebar { width: 200px; background: #1a1a1a; padding: 20px; flex-shrink: 0; display: flex; flex-direction: column; gap: 5px; }
+        .set-nav-btn { padding: 10px; border-radius: 8px; cursor: pointer; color: #777; font-weight: 600; font-size: 0.9rem; }
+        .set-nav-btn:hover { background: #252525; color: #ddd; }
+        .set-nav-btn.active { background: #2563eb; color: #fff; }
+
+        .set-content { flex: 1; padding: 40px; overflow-y: auto; }
+        .toggle-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 0; border-bottom: 1px solid #333;
+        }
+        .toggle-switch {
+            width: 50px; height: 26px; background: #333; border-radius: 13px; position: relative; cursor: pointer; transition: 0.3s;
+        }
+        .toggle-switch.on { background: var(--success); }
+        .toggle-switch::after {
+            content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px;
+            background: #fff; border-radius: 50%; transition: 0.3s;
+        }
+        .toggle-switch.on::after { transform: translateX(24px); }
+
+        .updates-layout { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; background: #333; padding: 20px; text-align: center; }
+        
+        .update-card-container {
+            width: 100%; max-width: 500px;
+            background: #fff; color: #000; border-radius: 10px; overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .upd-header { padding: 15px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #ccc; }
+        .upd-body { padding: 30px; }
+        
+        .upd-fake-red { background: #ffebee; }
+        .upd-fake-red .upd-header { background: #ffcdd2; }
+        
+        .upd-fake-ad { background: #fff8e1; }
+        .upd-fake-ad .upd-header { background: #ffecb3; }
+
+        .upd-real-win { background: #f3f4f6; font-family: 'Segoe UI', sans-serif; }
+        .upd-real-win .upd-header { background: #e5e7eb; }
+
+        .upd-btn-row { margin-top: 20px; display: flex; gap: 10px; justify-content: center; }
+
+  
+        .btn { padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-danger { background: var(--error); color: #fff; }
+        .btn-success { background: var(--success); color: #000; }
+        .btn-secondary { background: #e0e0e0; color: #000; }
+
+        #feedback-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 999;
+            display: none; justify-content: center; align-items: center; backdrop-filter: blur(5px);
+        }
+        .fb-modal {
+            background: #1a1a1a; padding: 40px; border-radius: 20px; border: 1px solid #444;
+            text-align: center; max-width: 500px; width: 90%;
+        }
+        .fb-title { font-size: 2rem; font-weight: 800; margin-bottom: 15px; }
+        .fb-text { font-size: 1.1rem; line-height: 1.6; color: #ccc; margin-bottom: 30px; }
+
+        @media (max-width: 768px) {
+            .window {
+                width: 100% !important;
+                height: calc(100% - 80px) !important; 
+                top: 0 !important; left: 0 !important;
+                transform: none !important; border-radius: 0 0 15px 15px;
+                opacity: 1 !important; animation: none !important; z-index: 50;
+            }
+
+            body, #desktop { position: fixed; width: 100%; height: 100%; }
+            .dock-tooltip { display: none !important; }
+
+            .taskbar { width: 95%; bottom: 10px; height: 60px; gap: 10px; padding: 0 10px; justify-content: space-around; }
+            .dock-icon { width: 40px; height: 40px; font-size: 20px; }
+            .dock-icon:hover { transform: none; }
+
+            .xp-widget { top: 10px; right: 10px; left: 10px; text-align: center; font-size: 0.8rem; z-index: 5; }
+            .win-header { padding: 0 10px; }
+
+            .gmail-container { flex-direction: column; }
+            .g-sidebar { width: 100%; flex-direction: row; overflow-x: auto; padding: 5px; border-right: none; border-bottom: 1px solid #333; flex-shrink: 0; }
+            .g-nav-item { padding: 8px 12px; font-size: 0.8rem; white-space: nowrap; }
+            .g-list { width: 100%; flex: 1; }
+            
+            .g-content { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #121212; z-index: 60; display: none; }
+            .g-content.active { display: block; }
+
+            .vk-container { position: relative; }
+            .vk-list { width: 100%; border-right: none; }
+            .vk-dialog { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #19191a; z-index: 60; display: none; }
+            .vk-dialog.active { display: flex; }
+
+            .browser-toolbar { flex-wrap: wrap; gap: 5px; }
+            .url-bar { font-size: 0.7rem; width: 100%; order: 3; margin-top: 5px; }
+            .web-viewport { padding: 15px; }
+            
+            .store-grid { grid-template-columns: repeat(2, 1fr); }
+            
+            .settings-layout { flex-direction: column; }
+            .set-sidebar { width: 100%; padding: 10px; flex-direction: row; gap: 5px; overflow-x: auto; border-bottom: 1px solid #333; }
+            .set-nav-btn { white-space: nowrap; padding: 8px 15px; }
+            .set-content { padding: 15px; }
+
+            .mobile-back-btn {
+                display: inline-block; padding: 5px 10px; margin-bottom: 10px;
+                background: #333; border-radius: 5px; color: #fff; font-size: 0.8rem; cursor: pointer;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="desktop">
+        
+        <div class="xp-widget">
+            XP: <span id="xp-count">0</span> | LVL: <span id="lvl-count">1</span>
+        </div>
+
+        <div class="taskbar">
+            <div class="dock-icon" onclick="AppManager.open('gmail')" style="color:#ea4335">
+                📧 <div class="dock-tooltip">Почта</div>
+            </div>
+            <div class="dock-icon" onclick="AppManager.open('vk')" style="color:#0077FF">
+                💬 <div class="dock-tooltip">VK</div>
+            </div>
+            <div class="dock-icon" onclick="AppManager.open('browser')" style="color:#FBC02D">
+                🌐 <div class="dock-tooltip">SafeWeb</div>
+            </div>
+            <div class="dock-icon" onclick="AppManager.open('files')" style="color:#FFA000">
+                📁 <div class="dock-tooltip">MyFiles</div>
+            </div>
+            <!-- <div class="dock-icon" onclick="AppManager.open('store')" style="color:#fff">
+                🛍️ <div class="dock-tooltip">Store</div>
+            </div> -->
+            <div class="dock-icon" onclick="AppManager.open('privacy')" style="color:#9E9E9E">
+                ⚙️ <div class="dock-tooltip">Privacy</div>
+            </div>
+            <div class="dock-icon" onclick="AppManager.open('updates')" style="color:#00d2ff">
+                🔄 <div class="dock-tooltip">Updates</div>
+            </div>
+        </div>
+
+        <div id="win-gmail" class="window">
+            <div class="win-header">
+                <span class="win-title">Gmail</span>
+                <div class="win-close" onclick="AppManager.close()">✖</div>
+            </div>
+            <div class="win-body gmail-container">
+                <div class="g-sidebar">
+                    <div class="g-nav-item active" id="g-btn-inbox" onclick="Gmail.filter('inbox')">📥 Входящие</div>
+                    <div class="g-nav-item" id="g-btn-starred" onclick="Gmail.filter('starred')">⭐ Важные</div>
+                    <div class="g-nav-item" id="g-btn-spam" onclick="Gmail.filter('spam')">⚠️ Спам</div>
+                    <div class="g-nav-item" id="g-btn-trash" onclick="Gmail.filter('trash')">🗑️ Корзина</div>
+                </div>
+                <div class="g-list" id="g-list-container"></div>
+                <div class="g-content" id="g-view-container">
+                    <div style="height:100%; display:flex; align-items:center; justify-content:center; color:#444;">
+                        Выберите письмо для чтения
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="win-vk" class="window">
+            <div class="win-header">
+                <span class="win-title">VK Messenger</span>
+                <div class="win-close" onclick="AppManager.close()">✖</div>
+            </div>
+            <div class="win-body vk-container">
+                <div class="vk-list" id="vk-list-container"></div>
+                <div class="vk-dialog">
+                    <div class="win-header" id="vk-header-name" style="background:transparent; border:none;">Чат</div>
+                    <div class="vk-messages-area" id="vk-msgs-area"></div>
+                    <div class="vk-input-area" id="vk-controls"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="win-browser" class="window">
+            <div class="win-header">
+                <span class="win-title">SafeWeb Browser v25.0</span>
+                <div class="win-close" onclick="AppManager.close()">✖</div>
+            </div>
+            <div class="win-body browser-shell">
+                <div class="browser-toolbar">
+                    <span style="cursor:pointer" onclick="Browser.prev()">⬅️</span> 
+                    <span style="cursor:pointer" onclick="Browser.next()">➡️</span>
+                    <div class="url-bar" id="browser-url"></div>
+                </div>
+                <div class="web-viewport" id="browser-content"></div>
+            </div>
+        </div>
+
+        <div id="win-store" class="window">
+            <div class="win-header">
+                <span class="win-title">AppStore</span>
+                <div class="win-close" onclick="AppManager.close()">✖</div>
+            </div>
+            <div class="win-body store-layout">
+                <div class="store-hero">
+                    <h1>Безопасность превыше всего</h1>
+                    <p>Проверяйте разрешения приложений перед установкой.</p>
+                </div>
+                <div class="store-grid" id="store-grid"></div>
+            </div>
+        </div>
+
+        <div id="win-files" class="window">
+            <div class="win-header">
+                <span class="win-title">My Documents</span>
+                <div class="win-close" onclick="AppManager.close()">✖</div>
+            </div>
+            <div class="win-body files-layout" id="files-grid"></div>
+        </div>
+
+        <div id="win-privacy" class="window">
+            <div class="win-header">
+                <span class="win-title">Настройки конфиденциальности</span>
+                <div class="win-close" onclick="AppManager.close()">✖</div>
+            </div>
+            <div class="win-body settings-layout">
+                <div class="set-sidebar">
+                    <div class="set-nav-btn active" onclick="Privacy.switchTab('general', this)">Общие</div>
+                    <div class="set-nav-btn" onclick="Privacy.switchTab('screen', this)">Экран</div>
+                    <div class="set-nav-btn" onclick="Privacy.switchTab('privacy', this)">Приватность</div>
+                    <div class="set-nav-btn" onclick="Privacy.switchTab('network', this)">Сеть</div>
+                    <div class="set-nav-btn" onclick="Privacy.switchTab('account', this)">Аккаунт</div>
+                </div>
+                <div class="set-content" id="privacy-content"></div>
+            </div>
+        </div>
+
+        <div id="win-updates" class="window">
+            <div class="win-header">
+                <span class="win-title">Обновление системы</span>
+                <div class="win-close" onclick="AppManager.close()">✖</div>
+            </div>
+            <div class="win-body updates-layout" id="updates-container">
+                </div>
+        </div>
+
+    </div>
+
+    <div id="feedback-overlay" onclick="document.getElementById('feedback-overlay').style.display='none'">
+        <div class="fb-modal">
+            <div class="fb-title" id="fb-title">Title</div>
+            <div class="fb-text" id="fb-msg">Message</div>
+            <div style="font-size:0.8rem; opacity:0.5;">(Кликните, чтобы закрыть)</div>
+        </div>
+    </div>
+
+    <script>
+   
+        
+        const MobileNav = {
+            closeView(appId) {
+                if (appId === 'gmail') document.getElementById('g-view-container').classList.remove('active');
+                if (appId === 'vk') document.querySelector('.vk-dialog').classList.remove('active');
+            }
+        };
+
+        const Game = {
+            xp: 0,
+            level: 1,
+            addXP(amount) {
+                this.xp += amount;
+                this.level = Math.floor(this.xp / 500) + 1;
+                document.getElementById('xp-count').innerText = this.xp;
+                document.getElementById('lvl-count').innerText = this.level;
+            },
+            feedback(isCorrect, message) {
+                const overlay = document.getElementById('feedback-overlay');
+                const title = document.getElementById('fb-title');
+                const msg = document.getElementById('fb-msg');
+                
+                if(isCorrect) {
+                    title.innerText = "ОТЛИЧНО!";
+                    title.style.color = "var(--success)";
+                    this.addXP(100);
+                } else {
+                    title.innerText = "ОШИБКА!";
+                    title.style.color = "var(--error)";
+                }
+                msg.innerText = message;
+                overlay.style.display = 'flex';
+            }
+        };
+
+        const AppManager = {
+            currentApp: null,
+            open(id) {
+                if (this.currentApp) document.getElementById('win-' + this.currentApp).style.display = 'none';
+                document.getElementById('win-' + id).style.display = 'flex';
+                this.currentApp = id;
+                
+                if(id === 'gmail') Gmail.init();
+                if(id === 'vk') VK.init();
+                if(id === 'browser') Browser.render();
+                if(id === 'store') Store.render();
+                if(id === 'files') Files.render();
+                if(id === 'privacy') Privacy.init();
+                if(id === 'updates') Updates.init();
+            },
+            close() {
+                if (this.currentApp) {
+                    document.getElementById('win-' + this.currentApp).style.display = 'none';
+                    if(this.currentApp === 'gmail') MobileNav.closeView('gmail');
+                    if(this.currentApp === 'vk') MobileNav.closeView('vk');
+                }
+                this.currentApp = null;
+            }
+        };
+
+        const Gmail = {
+            currentFolder: 'inbox',
+            emails: [
+                { id: 1, from: "Гендиректор", subj: "Срочный перевод", body: "Срочно оплати счет по ссылке. Не звони, я занят.", type: "inbox", starred: false, isSafe: false, reason: "Схема 'CEO Fraud'. Давят на срочность." },
+                { id: 2, from: "Netflix", subj: "Ошибка оплаты", body: "Обновите данные карты по ссылке netflix-secure.com", type: "spam", starred: false, isSafe: false, reason: "Фишинг. Проверь домен." },
+                { id: 3, from: "Мама", subj: "Рецепт пирога", body: "Ссылка на блог: kulinaria.ru", type: "inbox", starred: true, isSafe: true, reason: "Безопасно." },
+                { id: 4, from: "Госуслуги", subj: "Штраф ГИБДД", body: "Оплатите со скидкой 50% сегодня.", type: "inbox", starred: false, isSafe: false, reason: "Мошенники часто подделывают госпорталы." },
+                { id: 5, from: "Google Security", subj: "Новый вход", body: "Вход с iPhone 12 (США).", type: "inbox", starred: false, isSafe: true, reason: "Легитимное уведомление." },
+                { id: 6, from: "Адвокат Смит", subj: "Наследство", body: "Вам завещали 5 млн $.", type: "spam", starred: false, isSafe: false, reason: "Нигерийское письмо." },
+                { id: 7, from: "Steam Support", subj: "Trade Offer", body: "Перейдите на steeamcommunity.com", type: "inbox", starred: false, isSafe: false, reason: "Тайпосквоттинг (steeam)." },
+                { id: 8, from: "VK Уведомления", subj: "Оценка фото", body: "Вам поставили 5+", type: "inbox", starred: false, isSafe: true, reason: "Обычное уведомление." }
+            ],
+            init() { this.filter('inbox'); },
+            filter(folder) {
+                this.currentFolder = folder;
+                document.querySelectorAll('.g-nav-item').forEach(b => b.classList.remove('active'));
+                document.getElementById('g-btn-' + folder).classList.add('active');
+                let list = folder === 'starred' ? this.emails.filter(e => e.starred && e.type !== 'trash') : this.emails.filter(e => e.type === folder);
+                this.renderList(list);
+                const view = document.getElementById('g-view-container');
+                view.innerHTML = '<div style="height:100%; display:flex; align-items:center; justify-content:center; color:#444;">Выберите письмо</div>';
+                view.classList.remove('active');
+            },
+            renderList(list) {
+                const container = document.getElementById('g-list-container');
+                container.innerHTML = '';
+                if(list.length === 0) { container.innerHTML = '<div style="padding:20px; color:#555; text-align:center;">Папка пуста</div>'; return; }
+                list.forEach(mail => {
+                    const div = document.createElement('div');
+                    div.className = 'g-email-item unread';
+                    div.innerHTML = `<div class="g-sender">${mail.from} <span class="g-star-icon ${mail.starred ? 'active' : ''}" onclick="Gmail.toggleStar(event, ${mail.id})">★</span></div><div class="g-subj">${mail.subj}</div><div class="g-prev">${mail.body}</div>`;
+                    div.onclick = (e) => { if(!e.target.classList.contains('g-star-icon')) this.openMail(mail); };
+                    container.appendChild(div);
+                });
+            },
+            toggleStar(e, id) {
+                e.stopPropagation();
+                const m = this.emails.find(x => x.id === id);
+                if(m) { m.starred = !m.starred; this.filter(this.currentFolder); }
+            },
+            moveToTrash(id) {
+                const m = this.emails.find(x => x.id === id);
+                if(m) { m.type = 'trash'; m.starred = false; this.filter('inbox'); Game.feedback(true, "В корзине."); MobileNav.closeView('gmail'); }
+            },
+            openMail(mail) {
+                const view = document.getElementById('g-view-container');
+                view.classList.add('active');
+                const backBtn = window.innerWidth <= 768 ? `<div class="mobile-back-btn" onclick="MobileNav.closeView('gmail')">⬅ Назад</div>` : '';
+                const isTrash = mail.type === 'trash';
+                view.innerHTML = `${backBtn}<div class="g-view-header"><h2>${mail.subj}</h2><div style="display:flex; align-items:center; margin-top:10px;"><div class="g-avatar-circle">${mail.from[0]}</div><div><div style="font-weight:bold;">${mail.from}</div><div style="font-size:0.8rem; color:#aaa;">кому: мне</div></div></div></div><div style="line-height:1.6; font-size:1rem;">${mail.body}</div><div class="g-actions">${!isTrash ? `<button class="btn btn-success" onclick="Game.feedback(${mail.isSafe}, '${mail.reason}')">Это безопасно</button><button class="btn btn-danger" onclick="Game.feedback(${!mail.isSafe}, '${mail.reason}')">Это мошенники</button><button class="btn" style="background:#333; color:#fff; margin-left:auto;" onclick="Gmail.moveToTrash(${mail.id})">Удалить</button>` : `<span style="color:red;">Удалено</span>`}</div>`;
+            }
+        };
+
+        const VK = {
+            chats: [
+                { id: 1, name: "Дима", ava: "https://cdn-icons-png.flaticon.com/512/4140/4140048.png", msgs: [{in:true, text:"Скинь 5000р до завтра!"}], opts: [{text:"Куда?", safe:false, r:"Взлом! Позвони другу."},{text:"Позвонить", safe:true, r:"Верно. Проверяй просьбы о деньгах."}] },
+                { id: 2, name: "Староста", ava: "https://cdn-icons-png.flaticon.com/512/3006/3006876.png", msgs: [{in:true, text:"Расписание: schedule.docx"}], opts: [{text:"Скачать", safe:true, r:"Документы .docx обычно безопасны."}, {text:"Игнор", safe:true, r:"Осторожность не повредит."}] },
+                { id: 3, name: "Алина", ava: "https://cdn-icons-png.flaticon.com/512/6997/6997662.png", msgs: [{in:true, text:"Это ты на видео?? http://vk-leak.com"}], opts: [{text:"Открыть", safe:false, r:"Фишинг кражи пароля."}, {text:"Не переходить", safe:true, r:"Популярный развод."}] },
+                { id: 4, name: "Инвестор", ava: "https://cdn-icons-png.flaticon.com/512/4140/4140037.png", msgs: [{in:true, text:"Вложи 1000р - получи 10000р!"}], opts: [{text:"Давай!", safe:false, r:"Пирамида."}, {text:"Спам", safe:true, r:"Верно."}] },
+                { id: 5, name: "Support VK", ava: "https://cdn-icons-png.flaticon.com/512/4712/4712109.png", msgs: [{in:true, text:"Аккаунт блокируется. Дай код из СМС."}], opts: [{text:"1234", safe:false, r:"Поддержка не просит коды."}, {text:"Бан", safe:true, r:"Молодец."}] },
+                { id: 6, name: "Бот", ava: "https://cdn-icons-png.flaticon.com/512/1077/1077114.png", msgs: [{in:true, text:"Вы выиграли iPhone! Оплатите доставку."}], opts: [{text:"Плачу!", safe:false, r:"Развод на доставку."}, {text:"Удалить", safe:true, r:"Верно."}] },
+                { id: 7, name: "Мама", ava: "https://cdn-icons-png.flaticon.com/512/6997/6997662.png", msgs: [{in:true, text:"Купи хлеба."}], opts: [{text:"Ок", safe:true, r:"Это мама :)"}] },
+                { id: 8, name: "Анон", ava: "https://cdn-icons-png.flaticon.com/512/4140/4140047.png", msgs: [{in:true, text:"Познакомимся?"}], opts: [{text:"Привет", safe:true, r:"Пока безопасно."}, {text:"Блок", safe:true, r:"Твое право."}] }
+            ],
+            init() {
+                const list = document.getElementById('vk-list-container'); list.innerHTML = '';
+                this.chats.forEach(chat => {
+                    const el = document.createElement('div'); el.className = 'vk-chat-preview';
+                    el.innerHTML = `<div class="vk-ava" style="background-image: url('${chat.ava}')"></div><div class="vk-info"><div class="vk-name">${chat.name}</div><div class="vk-last">${chat.msgs[0].text}</div></div>`;
+                    el.onclick = () => this.openChat(chat);
+                    list.appendChild(el);
+                });
+            },
+            openChat(chat) {
+                document.querySelector('.vk-dialog').classList.add('active');
+                const backBtn = window.innerWidth <= 768 ? `<span class="mobile-back-btn" style="margin-right:10px;" onclick="MobileNav.closeView('vk')">⬅</span>` : '';
+                document.getElementById('vk-header-name').innerHTML = backBtn + ' ' + chat.name;
+                const area = document.getElementById('vk-msgs-area'); area.innerHTML = '';
+                chat.msgs.forEach(m => area.innerHTML += `<div class="vk-bubble vk-in">${m.text}</div>`);
+                const controls = document.getElementById('vk-controls'); controls.innerHTML = '';
+                if(chat.opts) {
+                    chat.opts.forEach(opt => {
+                        const btn = document.createElement('button'); btn.className = 'btn btn-primary'; btn.innerText = opt.text;
+                        btn.onclick = () => { area.innerHTML += `<div class="vk-bubble vk-out">${opt.text}</div>`; controls.innerHTML = ''; setTimeout(() => Game.feedback(opt.safe, opt.r), 600); };
+                        controls.appendChild(btn);
+                    });
+                }
+            }
+        };
+
+        const Browser = {
+            sites: [
+                { url: "https://online-sberbank.ru", safe: true, content: "<h1>Сбербанк Онлайн</h1><p>Личный кабинет. Введите логин.</p>", r: "Безопасно: HTTPS и верный домен." },
+                { url: "http://vk-login-secure.net", safe: false, content: "<h1>ВКонтакте</h1><p>Срочно войдите, чтобы не потерять страницу!</p>", r: "Опасно! HTTP и левый домен." },
+                { url: "https://g0ogle.com/search", safe: false, content: "<h1>Google</h1><p>Поиск...</p>", r: "Тайпосквоттинг: g0ogle (ноль вместо 'o')." },
+                { url: "https://steamcommunity.com", safe: true, content: "<h1>Steam</h1><p>Welcome to Steam</p>", r: "Официальный сайт." },
+                
+               
+                { url: "https://netfIix.com/login", safe: false, content: "<h1>NETFLIX</h1><p>Ваша подписка истекла. Продлите сейчас за 1$.</p>", r: "Внимательно: netfIix (большая 'i' вместо 'l'). Это фишинг." },
+                { url: "https://wikipedia.org", safe: true, content: "<h1>Wikipedia</h1><p>Свободная энциклопедия.</p>", r: "Официальный сайт Википедии." },
+                { url: "http://scan-pc-now.com", safe: false, content: "<h1>ВИРУС ОБНАРУЖЕН!</h1><p>Нажмите здесь, чтобы очистить ПК.</p>", r: "Это фейковый антивирус. Не скачивай ничего отсюда." },
+                { url: "https://youtube.com", safe: true, content: "<h1>YouTube</h1><p>Смотрите видео со всего мира.</p>", r: "Официальный сайт." },
+                { url: "https://elon-giveaway.com", safe: false, content: "<h1>Elon Musk Giveaway</h1><p>Отправь 1 BTC, получи 2 BTC обратно!</p>", r: "Классический крипто-скам. Никто не удваивает деньги бесплатно." },
+                { url: "http://192.168.1.1-admin-setup.xyz", safe: false, content: "<h1>Router Admin</h1><p>Обновление прошивки роутера.</p>", r: "Странный домен .xyz для настройки роутера — это ловушка." },
+                { url: "https://github.com", safe: true, content: "<h1>GitHub</h1><p>Where the world builds software.</p>", r: "Безопасный сайт для разработчиков." },
+                { url: "https://dhl-track-package.ru.com", safe: false, content: "<h1>DHL Delivery</h1><p>Ваша посылка задержана. Оплатите пошлину.</p>", r: "Домен третьего уровня (ru.com) часто используют мошенники." },
+                { url: "https://ozon-sale-90.ru", safe: false, content: "<h1>OZON SALE</h1><p>Ликвидация склада! Скидки 90% на iPhone.</p>", r: "Слишком щедро и домен левый. Это скам-магазин." },
+                { url: "https://zoom.us", safe: true, content: "<h1>Zoom</h1><p>Video conferencing.</p>", r: "Официальный сайт Zoom." }
+            ],
+            idx: 0,
+            render() {
+                const site = this.sites[this.idx];
+                document.getElementById('browser-url').innerHTML = `<span class="lock-icon ${site.url.startsWith('https') ? '' : 'unsafe'}">${site.url.startsWith('https') ? '🔒' : '⚠️'}</span> ${site.url}`;
+                document.getElementById('browser-content').innerHTML = `<div class="web-hero">${site.content}<hr style="margin:20px 0; border:0; border-top:1px solid #eee;"><p style="color:#777; margin-bottom:20px;">Ваше действие?</p><button class="btn-web" style="background:#10b981; color:white;" onclick="Browser.check(true)">Доверяю</button><button class="btn-web" style="background:#ef4444; color:white;" onclick="Browser.check(false)">Закрыть сайт</button></div>`;
+            },
+            check(userTrust) {
+                const site = this.sites[this.idx];
+                Game.feedback(site.safe === userTrust, site.r);
+                this.next();
+            },
+            next() {
+                this.idx = (this.idx + 1) % this.sites.length;
+                this.render();
+            },
+            prev() {
+                this.idx = (this.idx - 1 + this.sites.length) % this.sites.length;
+                this.render();
+            }
+        };
+
+        const Store = {
+            apps: [
+                { name: "Flashlight", icon: "🔦", rating: "2.1", perms: "Доступ: СМС, Контакты", safe: false, r: "Фонарику не нужны СМС. Это шпион." },
+                { name: "Calculator", icon: "🧮", rating: "4.8", perms: "Доступ: Нет", safe: true, r: "Безопасно." },
+                { name: "Photo Editor", icon: "📸", rating: "4.5", perms: "Доступ: Галерея", safe: true, r: "Доступ оправдан." },
+                { name: "Free Robux", icon: "💰", rating: "1.0", perms: "Доступ: Пароли", safe: false, r: "Мошенничество." },
+                { name: "Weather", icon: "⛅", rating: "4.2", perms: "Доступ: Геопозиция", safe: true, r: "Погоде нужно знать где ты." },
+                { name: "PDF Reader", icon: "📄", rating: "3.9", perms: "Доступ: Файлы", safe: true, r: "Нормально для читалки." }
+            ],
+            render() {
+                const grid = document.getElementById('store-grid'); grid.innerHTML = '';
+                this.apps.forEach(app => {
+                    const card = document.createElement('div'); card.className = 'app-card';
+                    card.innerHTML = `<div class="app-card-icon">${app.icon}</div><div style="font-weight:bold;">${app.name}</div><div class="app-rating">⭐ ${app.rating}</div><div class="app-perms">${app.perms}</div><div style="margin-top:10px;"><button class="btn btn-success" onclick="Game.feedback(${app.safe}, '${app.r}')">Скачать</button><button class="btn btn-danger" onclick="Game.feedback(${!app.safe}, '${app.r}')">Жалоба</button></div>`;
+                    grid.appendChild(card);
+                });
+            }
+        };
+
+        const Files = {
+            items: [
+                { name: "report.docx", type: "safe", icon: "📄", r: "Безопасно." },
+                { name: "foto.jpg", type: "safe", icon: "🖼️", r: "Безопасно." },
+                { name: "game_crack.exe", type: "virus", icon: "⚙️", r: ".exe из неизвестного источника — вирус." },
+                { name: "doc.pdf.exe", type: "virus", icon: "📄", r: "Двойное расширение!" },
+                { name: "song.mp3", type: "safe", icon: "🎵", r: "Музыка." },
+                { name: "run.bat", type: "virus", icon: "⚙️", r: "Скрипт может удалить файлы." }
+            ],
+            render() {
+                const grid = document.getElementById('files-grid'); grid.innerHTML = '';
+                this.items.forEach(f => {
+                    const el = document.createElement('div'); el.className = 'file-icon';
+                    el.innerHTML = `<div class="f-img">${f.icon}</div><div class="f-name">${f.name}</div>`;
+                    el.onclick = () => Game.feedback(f.type === 'safe', f.r);
+                    grid.appendChild(el);
+                });
+            }
+        };
+
+        const Privacy = {
+            activeTab: 'general',
+            data: {
+                'general': [
+                    { title: "Язык системы", on: true, safe: true, r: "Настройка языка безопасна." },
+                    { title: "Авто-обновление приложений", on: true, safe: true, r: "Обновления закрывают дыры в безопасности. Лучше оставить включенным." }
+                ],
+                'screen': [
+                    { title: "Таймаут блокировки экрана (30 мин)", on: true, safe: false, r: "30 минут — слишком долго. Если потеряешь телефон, вор успеет все украсть. Лучше 30 сек." },
+                    { title: "Показывать уведомления на заблокированном экране", on: true, safe: false, r: "Лучше выключить, чтобы никто не прочитал твои СМС с кодами банка." },
+                    { title: "Смарт-блокировка (дома)", on: false, safe: true, r: "Удобно, но менее безопасно. Выключено — надежнее." }
+                ],
+                'privacy': [
+                    { title: "Доступ 'Фонарика' к СМС", on: true, safe: false, r: "Фонарику не нужны СМС. Это шпион!" },
+                    { title: "Геолокация на фото", on: true, safe: false, r: "Отключив геометки, ты защищаешь свой адрес от сталкеров." },
+                    { title: "Персонализация рекламы", on: true, safe: false, r: "Это слежка за твоими интересами. Лучше выключить." }
+                ],
+                'network': [
+                    { title: "Авто-подключение к открытым Wi-Fi", on: true, safe: false, r: "Опасно! Открытые сети могут перехватывать данные." },
+                    { title: "Использовать VPN", on: false, safe: true, r: "VPN шифрует трафик. Включи для безопасности в кафе." },
+                    { title: "Bluetooth всегда включен", on: true, safe: false, r: "Через Bluetooth можно взломать устройство. Выключай, если не пользуешься." }
+                ],
+                'account': [
+                    { title: "Двухфакторная аутентификация (2FA)", on: false, safe: true, r: "ВКЛЮЧИ НЕМЕДЛЕННО! Это главная защита аккаунта." },
+                    { title: "Сохранять пароли в браузере", on: true, safe: false, r: "Если вирус украдет файлы браузера, он получит все пароли. Лучше используй менеджер паролей." }
+                ]
+            },
+            init() { this.render(); },
+            switchTab(tab, btn) {
+                this.activeTab = tab;
+                document.querySelectorAll('.set-nav-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.render();
+            },
+            render() {
+                const container = document.getElementById('privacy-content');
+                container.innerHTML = `<h3>Настройки: ${this.getTabName(this.activeTab)}</h3><p style="color:#777; margin-bottom:20px;">Красный = выкл, Зеленый = вкл. Найди небезопасные настройки.</p>`;
+                
+                this.data[this.activeTab].forEach((item, idx) => {
+                    const row = document.createElement('div');
+                    row.className = 'toggle-row';
+                    row.innerHTML = `<span>${item.title}</span><div class="toggle-switch ${item.on ? 'on' : ''}"></div>`;
+                    row.querySelector('.toggle-switch').onclick = (e) => {
+                        const el = e.target;
+                        el.classList.toggle('on');
+                        const isNowOn = el.classList.contains('on');
+                        const correctAction = (item.safe === isNowOn);
+                        Game.feedback(correctAction, item.r);
+                    };
+                    container.appendChild(row);
+                });
+            },
+            getTabName(tab) {
+                const names = { 'general': 'Общие', 'screen': 'Экран и безопасность', 'privacy': 'Приватность', 'network': 'Сеть и Интернет', 'account': 'Аккаунт' };
+                return names[tab];
+            }
+        };
+
+        const Updates = {
+            currentIdx: 0,
+            scenarios: [
+                { type: 'fake-ad', title: "ВАШ КОМПЬЮТЕР ЗАРАЖЕН!", text: "Найдены (13) вирусов. Нажмите СКАЧАТЬ, чтобы удалить их.", btn: "СКАЧАТЬ ЛЕКАРСТВО", isReal: false, r: "Это реклама (Fakeware). Настоящий антивирус не кричит капсом в браузере." },
+                { type: 'real-win', title: "Центр обновлений Windows", text: "Накопительное обновление 22H2 (KB50233). Исправления безопасности.", btn: "Установить и перезагрузить", isReal: true, r: "Правильно, это официальное обновление системы." },
+                { type: 'fake-red', title: "CRITICAL ERROR #0x8842", text: "System files damaged. Download fix tool immediately.", btn: "Repair Now", isReal: false, r: "Фейковое окно ошибки. Никогда не качай 'repair tools' с таких сайтов." },
+                { type: 'fake-ad', title: "Flash Player устарел", text: "Ваш плеер устарел. Видео не будет работать. Обновите сейчас.", btn: "Обновить Flash", isReal: false, r: "Flash Player больше не существует! Это 100% вирус." },
+                { type: 'real-win', title: "Android System Update", text: "Патч безопасности (Ноябрь 2025). Размер: 45 МБ.", btn: "Установить", isReal: true, r: "Официальный патч Android. Ставь смело." },
+                { type: 'fake-ad', title: "Скачать больше RAM", text: "Ваш компьютер медленный? Скачайте бесплатно 8 ГБ оперативной памяти!", btn: "Скачать RAM", isReal: false, r: "Скачать 'железо' невозможно. Это старый развод." },
+                { type: 'real-win', title: "Google Chrome", text: "Доступна новая версия. Перезапустите браузер для обновления.", btn: "Перезапустить", isReal: true, r: "Браузеры нужно обновлять для защиты от эксплойтов." },
+                { type: 'fake-red', title: "Java Update (Not verified)", text: "Publisher: Unknown. Do you want to run setup.exe?", btn: "Run", isReal: false, r: "Издатель 'Unknown' (Неизвестен)? Никогда не запускай такое." },
+                { type: 'fake-ad', title: "Driver Booster Pack", text: "Ускорь игры на 200%! Обнови все драйверы одной кнопкой.", btn: "Ускорить ПК", isReal: false, r: "Такие программы обычно устанавливают тонну мусора и рекламы." },
+                { type: 'real-win', title: "App Store", text: "Обновление Telegram. Что нового: исправлены баги.", btn: "Обновить", isReal: true, r: "Обычное обновление приложения." }
+            ],
+            init() {
+                this.currentIdx = 0;
+                this.render();
+            },
+            render() {
+                const container = document.getElementById('updates-container');
+                const item = this.scenarios[this.currentIdx];
+                
+                let styleClass = '';
+                if (item.type === 'fake-ad') styleClass = 'upd-fake-ad';
+                else if (item.type === 'fake-red') styleClass = 'upd-fake-red';
+                else styleClass = 'upd-real-win';
+
+                container.innerHTML = `
+                    <div style="color:#fff; margin-bottom:10px;">Проверка обновлений ${this.currentIdx + 1} из ${this.scenarios.length}...</div>
+                    <div class="update-card-container ${styleClass}">
+                        <div class="upd-header">
+                            <div style="width:15px; height:15px; background:${item.isReal ? '#0078d7' : 'red'}; border-radius:50%;"></div>
+                            <b>${item.title}</b>
+                        </div>
+                        <div class="upd-body">
+                            <p style="font-size:1.1rem; margin-bottom:15px;">${item.text}</p>
+                            <button class="btn btn-primary" style="width:100%;" onclick="Updates.check(true)">${item.btn}</button>
+                        </div>
+                    </div>
+                    <div class="upd-btn-row">
+                        <button class="btn btn-secondary" onclick="Updates.check(false)">Игнорировать / Это вирус</button>
+                    </div>
+                `;
+            },
+            check(userTrust) {
+                const item = this.scenarios[this.currentIdx];
+                const isCorrect = (item.isReal === userTrust);
+                Game.feedback(isCorrect, item.r);
+                
+                this.currentIdx = (this.currentIdx + 1) % this.scenarios.length;
+                setTimeout(() => this.render(), 1000); 
+            }
+        };
+
+    </script>
+</body>
+</html>
